@@ -4,6 +4,7 @@ from django.http import HttpResponseNotAllowed
 from .models import Question, Answer
 from .forms import QuestionForm, AnswerForm
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
@@ -33,6 +34,7 @@ def detail(request, question_id):
     )
 
 
+@login_required(login_url='common:login')
 def answer_create(request, question_id):
     # question = get_object_or_404(Question, pk=question_id)
     # question.answer_set.create(content=request.POST.get('content'), create_date=timezone.now())
@@ -46,6 +48,7 @@ def answer_create(request, question_id):
 
         if form.is_valid():
             answer = form.save(commit=False)
+            answer.author = request.user
             answer.create_date = timezone.now()
             answer.question = question
             answer.save()
@@ -66,12 +69,14 @@ def answer_create(request, question_id):
     )
 
 
+@login_required(login_url='common:login')
 def question_create(request):
     if request.method == 'POST':
         form = QuestionForm(request.POST)
 
         if form.is_valid():
             question = form.save(commit=False)
+            question.author = request.user
             question.create_date = timezone.now()
             question.save()
 
