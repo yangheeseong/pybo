@@ -18,6 +18,9 @@ from django.urls import path, include
 
 from pybo.views import base_views
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('pybo/', include('pybo.urls')),
@@ -25,4 +28,5 @@ urlpatterns = [
     path('', base_views.index, name='index'),
 ]
 
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 handler404 = 'common.views.page_not_found'
