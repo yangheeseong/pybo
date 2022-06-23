@@ -11,12 +11,33 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, json
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from django.core.exceptions import ImproperlyConfigured
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Sentry-SDK
+sentry_file = os.path.join(BASE_DIR, 'sentry.json')
+
+with open(sentry_file, 'r') as f:
+    sentry = json.loads(f.read())
+
+
+def get_sentry(setting, sentry=sentry):
+    try:
+        return sentry[setting]
+    except KeyError:
+        error_msg = "Set the {} environment variable".format(setting)
+        raise ImproperlyConfigured(error_msg)
+
+
+sentry_dns = get_sentry("DNS")
 
 sentry_sdk.init(
-    dsn="https://38b18956fe934d0ebb63c0de1a6cd920@o1290362.ingest.sentry.io/6510958",
+    dsn=sentry_dns,
     integrations=[
         DjangoIntegration(),
     ],
@@ -31,15 +52,25 @@ sentry_sdk.init(
     send_default_pii=True
 )
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-()wc-zhqw20d5(myrgh#f!+hu7(anc@9h82su#w$k_=kh@q$8h')
+secret_file = os.path.join(BASE_DIR, 'secrets.json')
+
+with open(secret_file, 'r') as f:
+    secrets = json.loads(f.read())
+
+
+def get_secret(setting, secrets=secrets):
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = "Set the {} environment variable".format(setting)
+        raise ImproperlyConfigured(error_msg)
+
+
+SECRET_KEY = get_secret("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get('DEBUG', 1))

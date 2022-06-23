@@ -114,6 +114,9 @@ venv.bak/
 .env.dev/
 .env.prod/
 .env.prod.db/
+secrets.json
+sentry.json
+config/settings/
 
 # Spyder project settings
 .spyderproject
